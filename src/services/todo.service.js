@@ -38,6 +38,30 @@ class TodoService {
             todos = todos.filter(todo => todo.title.toLowerCase().includes(searchTerm));
         }
 
+        if (filters.sortBy) {
+            const order = filters.sortOrder === 'desc' ? -1 : 1;
+            
+            todos.sort((a, b) => {
+                if (filters.sortBy === 'priority') {
+                    const priorityValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3 };
+                    return (priorityValues[a.priority] - priorityValues[b.priority]) * order;
+                } else if (filters.sortBy === 'createdAt') {
+                    return (new Date(a.createdAt) - new Date(b.createdAt)) * order;
+                }
+                return 0;
+            });
+        }
+
+        if (filters.page && filters.limit) {
+            const page = parseInt(filters.page, 10);
+            const limit = parseInt(filters.limit, 10);
+            
+            const startIndex = (page - 1) * limit;
+            const endIndex = page * limit;
+            
+            todos = todos.slice(startIndex, endIndex);
+        }
+
         return todos;
     }
 
